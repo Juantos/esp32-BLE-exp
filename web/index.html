@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <button onclick="connectToDevice()">Connect to ESP32</button>
+  <div id="output"></div>
+
+  <script>
+    async function connectToDevice() {
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ name: 'ESP32_HTML_Server' }],
+          optionalServices: ['b6cc2cb5-1891-4e03-8c7b-eb09cd3db7b6']
+        });
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('b6cc2cb5-1891-4e03-8c7b-eb09cd3db7b6');
+        const characteristic = await service.getCharacteristic('6a3a4a27-1db1-4309-ab31-8bd1648b91ff');
+        const value = await characteristic.readValue();
+        const decoder = new TextDecoder('utf-8');
+        const htmlContent = decoder.decode(value);
+
+        document.getElementById('output').innerHTML = htmlContent;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
